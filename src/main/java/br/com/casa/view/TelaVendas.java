@@ -1,27 +1,71 @@
 package br.com.casa.view;
 
-import java.awt.FlowLayout;
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.NoResultException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+
+import br.com.casa.dao.Dao;
+import br.com.casa.domain.ItensPedido;
+import br.com.casa.domain.Pedido;
+import br.com.casa.domain.Produto;
 
 public class TelaVendas extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	protected JFrame frame;
 
+	Pane pane;
+	JPanel painel;
+
+	Dao<ItensPedido> dao;
+	Dao<Produto> daoProduto;
+	Dao<Pedido> daoPedido;
+	Produto produto;
+	Pedido pedido;
+	ItensPedido itens;
+	List<ItensPedido> itensPedido;
+
+	JLabel titulo;
+	JLabel quantidade;
+	JLabel codPedido;
+	JLabel precoUnd;
+	JLabel valorTotal;
+
+	JTextField txtQtd;
+	JTextField txtCodPed;
+	JTextField txtPreco;
+	JTextField txtTotal;
+	JTextField txtBuscar;
+
+	JTable tabela;
+	DefaultTableModel modelo;
+	JScrollPane scroll;
+
+	JButton buscar;
+	JButton comprar;
+
 	public TelaVendas() {
 		super("Vendas");
 		tela();
 	}
 
-	@SuppressWarnings("static-access")
 	void tela() {
 		frame = new JFrame();
 		this.setSize(1300, 720);
@@ -29,119 +73,191 @@ public class TelaVendas extends JFrame {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setVisible(true);
 		this.getContentPane().setLayout(null);
-		this.setBackground(getBackground().RED);
 		this.setResizable(false);
 
-		JPanel tela0 = new JPanel();
-		tela0.setBackground(getBackground().RED);
-		tela0.setBounds(0, 0, 1300, 50);
+		pane = new Pane();
+		pane.setBounds(0, 0, 1300, 720);
 
-		JPanel tela1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		tela1.setBackground(getBackground().RED);
-		tela1.setBounds(0, 50, 1300, 70);
-		JLabel nomeMercado = new JLabel("MERCADO DOÇE COMPRA");
-		nomeMercado.setFont(new Font("arial", Font.BOLD, 30));
-		tela1.add(nomeMercado);
+		painel = new JPanel();
+		painel.setBounds(0, 0, 1300, 720);
+		painel.setLayout(null);
 
-		JPanel tela2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		tela2.setBackground(getBackground().RED);
-		tela2.setBounds(0, 120, 1300, 50);
-		tela2.setAlignmentX(15);
-		JLabel codigo = new JLabel("Cod.");
-		codigo.setFont(new Font("arial", Font.BOLD, 15));
-		tela2.add(codigo);
-		JTextField txtcodigo = new JTextField(5);
-		tela2.add(txtcodigo);
+		titulo = new JLabel("SISTEMA DE VENDAS");
+		titulo.setFont(new Font("arial", Font.BOLD, 30));
+		titulo.setBounds(475, 100, 350, 30);
 
-		JLabel produto = new JLabel("Produto ");
-		produto.setFont(new Font("arial", Font.BOLD, 15));
-		tela2.add(produto);
-		JTextField txtProduto = new JTextField(10);
-		tela2.add(txtProduto);
-		JButton buscar = new JButton("Buscar");
-		tela2.add(buscar);
+		quantidade = new JLabel("QUANTIDADE");
+		quantidade.setBounds(30, 200, 150, 20);
+		quantidade.setFont(new Font("arial black", Font.BOLD, 15));
 
-		JLabel quantidade = new JLabel("Quantidade ");
-		quantidade.setFont(new Font("arial", Font.BOLD, 15));
-		tela2.add(quantidade);
-		JTextField txtQuantidade = new JTextField(7);
-		tela2.add(txtQuantidade);
-		JButton adicionar = new JButton("Adicionar");
-		tela2.add(adicionar);
+		txtQtd = new JTextField();
+		txtQtd.setBounds(30, 225, 150, 30);
+		txtQtd.setFont(new Font("arial black", Font.BOLD, 20));
+		txtQtd.setBackground(Color.GREEN);
+		txtQtd.setForeground(Color.RED);
+		txtQtd.setHorizontalAlignment(JTextField.CENTER);
+		painel.add(txtQtd);
 
-		JPanel tela3 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		tela3.setBackground(getBackground().red);
-		tela3.setBounds(0, 170, 1300, 50);
-		JLabel precoUnitario = new JLabel("PreçoUnd R$");
-		precoUnitario.setFont(new Font("arial", Font.BOLD, 15));
-		tela3.add(precoUnitario);
-		JTextField txtPrecoUnitario = new JTextField(7);
-		tela3.add(txtPrecoUnitario);
+		codPedido = new JLabel("COD/PEDIDO");
+		codPedido.setBounds(30, 265, 150, 20);
+		codPedido.setFont(new Font("arial black", Font.BOLD, 15));
 
-		JLabel fornecedor = new JLabel("Fornecedor ");
-		fornecedor.setFont(new Font("arial", Font.BOLD, 15));
-		tela3.add(fornecedor);
-		JTextField txtFornecedor = new JTextField(10);
-		tela3.add(txtFornecedor);
+		txtCodPed = new JTextField();
+		txtCodPed.setBounds(30, 290, 150, 30);
+		txtCodPed.setFont(new Font("arial black", Font.BOLD, 20));
+		txtCodPed.setBackground(Color.GREEN);
+		txtCodPed.setForeground(Color.RED);
+		txtCodPed.setHorizontalAlignment(JTextField.CENTER);
+		painel.add(txtCodPed);
 
-		JLabel data = new JLabel("Data ");
-		data.setFont(new Font("arial", Font.BOLD, 15));
-		tela3.add(data);
-		JTextField txtData = new JTextField(10);
-		tela3.add(txtData);
-		JButton remover = new JButton("Remover");
-		tela3.add(remover);
+		precoUnd = new JLabel("PREÇO");
+		precoUnd.setBounds(30, 330, 100, 20);
+		precoUnd.setFont(new Font("arial black", Font.BOLD, 15));
 
-		JPanel tela4 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		tela4.setBackground(getBackground().RED);
-		tela4.setBounds(0, 220, 1300, 50);
-		JLabel pagamento = new JLabel("Pagamento");
-		pagamento.setFont(new Font("arial", Font.BOLD, 15));
-		tela4.add(pagamento);
-		JTextField txtPagamento = new JTextField(10);
-		tela4.add(txtPagamento);
+		txtPreco = new JTextField();
+		txtPreco.setBounds(30, 355, 150, 30);
+		txtPreco.setFont(new Font("arial black", Font.BOLD, 20));
+		txtPreco.setBackground(Color.GREEN);
+		txtPreco.setForeground(Color.RED);
+		txtPreco.setHorizontalAlignment(JTextField.CENTER);
+		painel.add(txtPreco);
 
-		JLabel valorTotal = new JLabel("Valor Total");
-		valorTotal.setFont(new Font("arial", Font.BOLD, 15));
-		tela4.add(valorTotal);
-		JTextField txtvalorTotal = new JTextField(10);
-		tela4.add(txtvalorTotal);
+		valorTotal = new JLabel("TOTAL");
+		valorTotal.setBounds(30, 395, 100, 20);
+		valorTotal.setFont(new Font("arial black", Font.BOLD, 15));
 
-		JLabel troco = new JLabel("Troco ");
-		troco.setFont(new Font("arial", Font.BOLD, 15));
-		tela4.add(troco);
-		JTextField txtTroco = new JTextField(10);
-		tela4.add(txtTroco);
+		txtTotal = new JTextField();
+		txtTotal.setBounds(30, 420, 150, 30);
+		txtTotal.setFont(new Font("arial black", Font.BOLD, 20));
+		txtTotal.setBackground(Color.GREEN);
+		txtTotal.setForeground(Color.RED);
+		txtTotal.setHorizontalAlignment(JTextField.CENTER);
+		painel.add(txtTotal);
 
-		JPanel tela5 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		tela5.setBackground(getBackground().red);
-		tela5.setBounds(0, 270, 1300, 380);
-		JTextArea area = new JTextArea(23, 80);
-		tela5.add(area);
+		modelo = new DefaultTableModel(30, 0);
+		modelo.addColumn("Produto");
+		modelo.addColumn("Pedido");
+		modelo.addColumn("Quantidade");
+		modelo.addColumn("Preço Unitario");
+		modelo.addColumn("Valor da Compra");
 
-		JPanel tela6 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		tela6.setBackground(getBackground().red);
-		tela6.setBounds(0, 650, 1300, 50);
+		tabela = new JTable(modelo);
+		tabela.setBounds(200, 200, 960, 300);
 
-		JLabel codVendedor = new JLabel("Cod.");
-		codVendedor.setFont(new Font("arial", Font.BOLD, 15));
-		tela6.add(codVendedor);
-		JTextField txtCodVendedor = new JTextField(7);
-		tela6.add(txtCodVendedor);
+		scroll = new JScrollPane(tabela);
+		scroll.setBounds(200, 200, 960, 300);
 
-		JLabel nomeVendedor = new JLabel("Nome do Vendedor");
-		nomeVendedor.setFont(new Font("arial", Font.BOLD, 15));
-		tela6.add(nomeVendedor);
-		JTextField txtNomeVendedor = new JTextField(15);
-		tela6.add(txtNomeVendedor);
+		txtBuscar = new JTextField();
+		txtBuscar.setBounds(450, 515, 300, 30);
+		txtBuscar.setFont(new Font("arial black", Font.BOLD, 20));
+		txtBuscar.setBackground(Color.GREEN);
+		txtBuscar.setForeground(Color.RED);
+		txtBuscar.setHorizontalAlignment(JTextField.CENTER);
+		painel.add(txtBuscar);
 
-		this.add(tela0);
-		this.add(tela1);
-		this.add(tela2);
-		this.add(tela3);
-		this.add(tela4);
-		this.add(tela5);
-		this.add(tela6);
+		buscar = new JButton("Buscar");
+		buscar.setBounds(755, 515, 100, 30);
+		buscar.setFont((new Font("arial black", Font.BOLD, 13)));
+		buscar.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				try {
+
+					daoProduto = new Dao<Produto>(Produto.class);
+					dao = new Dao<ItensPedido>(ItensPedido.class);
+					daoPedido = new Dao<Pedido>(Pedido.class);
+
+					Integer quantidade = Integer.parseInt(txtQtd.getText());
+					String busca = txtBuscar.getText();
+					produto = new Produto();
+
+					produto = daoProduto.buscarPorNome(busca);
+					pedido = new Pedido();
+					Long codigo = Long.parseLong(txtCodPed.getText());
+					pedido.setCodigo(codigo);
+
+					itens = new ItensPedido(produto, pedido, quantidade);
+
+					Object[] obj = { itens.getProduto().getNome(), codigo, itens.getQuantidade(),
+							itens.getPrecoUnitario(), itens.getValorCompra() };
+
+					modelo.insertRow(0, obj);
+
+					txtPreco.setText(String.valueOf(produto.getPrecoUnitario()));
+
+					dao.salvar(itens);
+
+//					itensPedido = new ArrayList<ItensPedido>();
+//					itensPedido.add(itens);
+//					BigDecimal total = new BigDecimal(0);
+//					BigDecimal valor = new BigDecimal(0);
+//					for (ItensPedido p : itensPedido) {
+//					valor = valor.add(p.getValorCompra());
+//					total = total.add(valor);
+//					}
+//					
+//					txtTotal.setText(String.valueOf(total));
+
+					txtQtd.setText("");
+					txtBuscar.setText("");
+
+				} catch (NumberFormatException e1) {
+					JOptionPane.showMessageDialog(null, "Erro de NumberFormat");
+					txtQtd.setText("");
+					txtBuscar.setText("");
+					e1.printStackTrace();
+				} catch (HeadlessException e1) {
+					JOptionPane.showMessageDialog(null, "Erro de Hedless");
+					txtQtd.setText("");
+					txtBuscar.setText("");
+					e1.printStackTrace();
+				} catch (NullPointerException e1) {
+					JOptionPane.showMessageDialog(null, "Nulo ou inexistente");
+					txtQtd.setText("");
+					txtBuscar.setText("");
+					e1.printStackTrace();
+				} catch (NoResultException e1) {
+					JOptionPane.showMessageDialog(null, "Nenhum item encontrado para esta buscar");
+					txtQtd.setText("");
+					txtBuscar.setText("");
+					e1.printStackTrace();
+				}
+
+			}
+		});
+
+		comprar = new JButton("Comprar");
+		comprar.setBounds(955, 515, 100, 30);
+		comprar.setFont((new Font("arial black", Font.BOLD, 13)));
+		comprar.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+
+		painel.add(buscar);
+
+		painel.add(comprar);
+
+		painel.add(scroll);
+
+		painel.add(valorTotal);
+
+		painel.add(precoUnd);
+
+		painel.add(codPedido);
+
+		painel.add(quantidade);
+
+		painel.add(titulo);
+
+		painel.add(pane);
+
+		this.add(painel);
 	}
 
 	@SuppressWarnings("unused")

@@ -1,6 +1,5 @@
 package br.com.casa.view;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -107,12 +106,19 @@ public class TelaLogin extends JFrame {
 						usuario = dao.buscarPorNome(login);
 
 						if (login.equals(usuario.getNome()) && new String(senha).equals(usuario.getSenha())
-								&& usuario.getAdmin() == null) {
+								&& usuario.getAdmin() == null || usuario.getAdmin() == false) {
 							telaVendas();
 							txtLogin.setText("");
 							txtSenha.setText("");
 							fechar();
+						}
 
+						else if (login.equals(usuario.getNome()) && new String(senha).equals(usuario.getSenha())
+								&& usuario.getAdmin() == true) {
+							telaProdutos();
+							txtLogin.setText("");
+							txtSenha.setText("");
+							fechar();
 						} else {
 							JOptionPane.showMessageDialog(null, "Usuario ou senha incorretos.");
 							txtLogin.setText("");
@@ -139,24 +145,9 @@ public class TelaLogin extends JFrame {
 
 		});
 
-		adm = new JButton("ADM");
-		adm.setBounds(710, 470, 80, 30);
-		adm.setBackground(Color.GREEN);
-		adm.setForeground(Color.RED);
-		adm.setFont(new Font("arial", Font.BOLD, 15));
-		adm.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				telaAdm();
-				fechar();
-			}
-		});
-
 		painel.add(txtSenha);
 		painel.add(txtLogin);
 		painel.add(entrar);
-		painel.add(adm);
 		painel.add(senha);
 		painel.add(login);
 		painel.add(titulo);
@@ -169,10 +160,10 @@ public class TelaLogin extends JFrame {
 		TelaVendas venda = new TelaVendas();
 		venda.tela();
 	}
-	
-	public void telaAdm() {
-		TelaLoginAdm adm = new TelaLoginAdm();
-		adm.tela();
+
+	public void telaProdutos() {
+		TelaProdutos produto = new TelaProdutos();
+		produto.telaProduto();
 	}
 
 	public void fechar() {

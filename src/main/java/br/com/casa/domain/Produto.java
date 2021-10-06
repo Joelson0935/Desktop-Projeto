@@ -26,6 +26,10 @@ public class Produto {
 	public Produto() {
 		super();
 	}
+	public Produto(String nome) {
+		super();
+		this.nome = nome;
+	}
 
 	public Produto(Long id, String produto, String marca, Integer quantidade, BigDecimal precoUnitario) {
 		super();

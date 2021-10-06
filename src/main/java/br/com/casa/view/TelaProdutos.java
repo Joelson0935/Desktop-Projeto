@@ -185,7 +185,7 @@ public class TelaProdutos extends JFrame implements ActionListener {
 						JOptionPane.showMessageDialog(null, "O campo código está vazio ou não existe.");
 						e1.printStackTrace();
 					} catch (NullPointerException e1) {
-						JOptionPane.showMessageDialog(null, "O campo código está vazio ou não existe.");
+						JOptionPane.showMessageDialog(null, "Produto não existente ou esgotado.");
 						txtCod.setText("");
 					}
 				}
